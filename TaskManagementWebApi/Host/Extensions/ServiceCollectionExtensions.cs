@@ -2,6 +2,10 @@ using System.Text.Json.Serialization;
 using Asp.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using TaskManagementWebApi.Application.Handlers;
+using TaskManagementWebApi.Application.Handlers.Interfaces;
+using TaskManagementWebApi.Application.Observers;
+using TaskManagementWebApi.Application.Observers.Interfaces;
 using TaskManagementWebApi.Application.Services;
 using TaskManagementWebApi.Application.Services.Interfaces;
 using TaskManagementWebApi.Infrastructure.Persistence;
@@ -99,6 +103,13 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITaskService, TaskService>();
         services.AddScoped<IUserService, UserService>();
         services.AddHostedService<TaskReassignmentService>();
+        
+        services.AddTransient<ICandidateSelectionHandler, ExcludeCurrentUserHandler>();
+        services.AddTransient<ICandidateSelectionHandler, ExcludePreviousUserHandler>();
+        services.AddSingleton<CandidateHandlerChainBuilder>();
+        
+        services.AddSingleton<TaskEventPublisher>();
+        services.AddScoped<ITaskObserver, LoggingTaskObserver>();
 
         return services;
     }
