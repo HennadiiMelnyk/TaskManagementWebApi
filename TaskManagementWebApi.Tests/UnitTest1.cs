@@ -1,4 +1,6 @@
-﻿namespace TaskManagementWebApi.Tests;
+﻿using NUnit.Framework;
+
+namespace TaskManagementWebApi.Tests;
 
 public class Tests
 {
