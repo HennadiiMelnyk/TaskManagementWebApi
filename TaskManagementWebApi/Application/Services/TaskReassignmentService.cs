@@ -1,5 +1,8 @@
 using System.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using TaskManagementWebApi.Application.Handlers;
+using TaskManagementWebApi.Application.Observers;
+using TaskManagementWebApi.Application.States;
 using TaskManagementWebApi.Domain.Entities;
 using TaskManagementWebApi.Infrastructure.Persistence;
 using TaskManagementWebApi.Infrastructure.Repositories.Interfaces;
@@ -26,7 +29,10 @@ public class TaskReassignmentService : BackgroundService
             {
                 using var scope = _scopeFactory.CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<TaskManagementDbContext>();
-                await ReassignTasksAsync(db, stoppingToken);
+                var chainBuilder = scope.ServiceProvider.GetRequiredService<CandidateHandlerChainBuilder>();
+                var publisher = scope.ServiceProvider.GetRequiredService<TaskEventPublisher>();
+
+                await ReassignTasksAsync(db, chainBuilder, publisher, stoppingToken);
             }
             catch (Exception ex)
             {
@@ -38,8 +44,12 @@ public class TaskReassignmentService : BackgroundService
                 await Task.Delay(delay, stoppingToken);
         }
     }
-
-    private async Task ReassignTasksAsync(TaskManagementDbContext db, CancellationToken token)
+    
+        private async Task ReassignTasksAsync(
+        TaskManagementDbContext db,
+        CandidateHandlerChainBuilder chainBuilder,
+        TaskEventPublisher publisher,
+        CancellationToken token)
     {
         var tasks = await db.Tasks
             .Where(t => t.State == TaskState.InProgress)
@@ -48,6 +58,8 @@ public class TaskReassignmentService : BackgroundService
         var users = await db.Users.ToArrayAsync(token);
         var rnd = new Random();
 
+        var handler = chainBuilder.Build();
+
         foreach (var task in tasks)
         {
             var history = await db.TaskAssignments
@@ -55,12 +67,10 @@ public class TaskReassignmentService : BackgroundService
                 .OrderByDescending(h => h.AssignedAt)
                 .ToArrayAsync(token);
 
-            var prevUserId = history.Skip(1).FirstOrDefault()?.AssignedUserId;
-            var currentUserId = task.AssignedUserId;
+            var previousState = task.State;
+            var previousUserId = task.AssignedUserId;
 
-            var candidates = users
-                .Where(u => u.Id != currentUserId && u.Id != prevUserId)
-                .ToArray();
+            var candidates = handler.Handle(users, task, history);
 
             if (candidates.Length == 0)
             {
@@ -76,11 +86,16 @@ public class TaskReassignmentService : BackgroundService
                     task.AssignedUserId = null;
                 }
 
+                await publisher.PublishAsync(task, new TaskChangeContext
+                {
+                    PreviousState = previousState,
+                    PreviousUserId = previousUserId
+                }, token);
+
                 continue;
             }
 
             var newUser = candidates[rnd.Next(candidates.Length)];
-
             task.AssignedUserId = newUser.Id;
             task.State = TaskState.InProgress;
 
@@ -90,6 +105,12 @@ public class TaskReassignmentService : BackgroundService
                 AssignedUserId = newUser.Id,
                 AssignedAt = DateTime.UtcNow
             });
+
+            await publisher.PublishAsync(task, new TaskChangeContext
+            {
+                PreviousState = previousState,
+                PreviousUserId = previousUserId
+            }, token);
         }
 
         await db.SaveChangesAsync(token);
