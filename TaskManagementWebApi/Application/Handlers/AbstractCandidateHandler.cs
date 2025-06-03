@@ -13,11 +13,11 @@ public abstract class AbstractCandidateHandler : ICandidateSelectionHandler
         return next;
     }
 
-    public virtual User[] Handle(User[] candidates, TaskItem task, IEnumerable<TaskAssignmentHistory> history)
+    public virtual IQueryable<User> Handle(IQueryable<User> candidates, TaskItem task, IEnumerable<TaskAssignmentHistory> history)
     {
         var filtered = Process(candidates, task, history);
         return _next?.Handle(filtered, task, history) ?? filtered;
     }
 
-    protected abstract User[] Process(User[] candidates, TaskItem task, IEnumerable<TaskAssignmentHistory> history);
+    protected abstract IQueryable<User> Process(IQueryable<User> candidates, TaskItem task, IEnumerable<TaskAssignmentHistory> history);
 }

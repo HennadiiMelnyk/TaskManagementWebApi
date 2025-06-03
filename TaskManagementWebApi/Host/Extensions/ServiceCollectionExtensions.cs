@@ -29,9 +29,6 @@ public static class ServiceCollectionExtensions
                     {
                         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                     });
-
-                services.AddMemoryCache();
-                services.AddProblemDetails();
             });
 
             builder.Configure((context, app) =>
@@ -49,7 +46,6 @@ public static class ServiceCollectionExtensions
 
 
                 app.UseRouting();
-                app.UseAuthorization();
                 app.UseEndpoints(endpoints =>
                 {
                     endpoints.MapControllers();

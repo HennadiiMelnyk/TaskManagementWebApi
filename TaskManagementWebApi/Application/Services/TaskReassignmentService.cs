@@ -45,7 +45,7 @@ public class TaskReassignmentService : BackgroundService
         }
     }
     
-        private async Task ReassignTasksAsync(
+    private async Task ReassignTasksAsync(
         TaskManagementDbContext db,
         CandidateHandlerChainBuilder chainBuilder,
         TaskEventPublisher publisher,
@@ -55,10 +55,8 @@ public class TaskReassignmentService : BackgroundService
             .Where(t => t.State == TaskState.InProgress)
             .ToArrayAsync(token);
 
-        var users = await db.Users.ToArrayAsync(token);
-        var rnd = new Random();
-
         var handler = chainBuilder.Build();
+        var rnd = new Random();
 
         foreach (var task in tasks)
         {
@@ -69,8 +67,11 @@ public class TaskReassignmentService : BackgroundService
 
             var previousState = task.State;
             var previousUserId = task.AssignedUserId;
+            
+            var candidatesQuery = db.Users.AsQueryable();
+            candidatesQuery = handler.Handle(candidatesQuery, task, history);
 
-            var candidates = handler.Handle(users, task, history);
+            var candidates = await candidatesQuery.ToArrayAsync(token);
 
             if (candidates.Length == 0)
             {
@@ -80,7 +81,9 @@ public class TaskReassignmentService : BackgroundService
                     .Distinct()
                     .ToHashSet();
 
-                if (users.All(u => allUserIds.Contains(u.Id)))
+                var allUserIdsInDb = await db.Users.Select(u => u.Id).ToListAsync(token);
+
+                if (allUserIdsInDb.All(uid => allUserIds.Contains(uid)))
                 {
                     task.State = TaskState.Completed;
                     task.AssignedUserId = null;

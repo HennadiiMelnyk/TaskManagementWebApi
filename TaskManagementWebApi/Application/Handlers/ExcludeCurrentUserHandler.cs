@@ -4,8 +4,11 @@ namespace TaskManagementWebApi.Application.Handlers;
 
 public class ExcludeCurrentUserHandler : AbstractCandidateHandler
 {
-    protected override User[] Process(User[] candidates, TaskItem task, IEnumerable<TaskAssignmentHistory> _)
+    protected override IQueryable<User> Process(IQueryable<User> users, TaskItem task, IEnumerable<TaskAssignmentHistory> _)
     {
-        return candidates.Where(u => u.Id != task.AssignedUserId).ToArray();
+        if (task.AssignedUserId == null)
+            return users;
+
+        return users.Where(u => u.Id != task.AssignedUserId);
     }
 }
