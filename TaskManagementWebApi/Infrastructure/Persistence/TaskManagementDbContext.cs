@@ -14,6 +14,8 @@ public class TaskManagementDbContext : DbContext
     
     public virtual DbSet<TaskItem> Tasks { get; set; }
     
+    public DbSet<TaskAssignmentHistory> TaskAssignments { get; set; }
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(TaskManagementDbContext).Assembly);

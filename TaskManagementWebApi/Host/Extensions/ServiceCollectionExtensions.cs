@@ -80,6 +80,7 @@ public static class ServiceCollectionExtensions
     {
         serviceCollection.AddScoped<IUserRepository, UserRepository>();
         serviceCollection.AddScoped<ITaskRepository, TaskRepository>();
+        serviceCollection.AddScoped<ITaskAssignmentHistoryRepository, TaskAssignmentHistoryRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(configuration.GetConnectionString("DefaultConnection"));
         dataSourceBuilder.EnableDynamicJson();
@@ -97,6 +98,7 @@ public static class ServiceCollectionExtensions
     {
         services.AddScoped<ITaskService, TaskService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddHostedService<TaskReassignmentService>();
 
         return services;
     }

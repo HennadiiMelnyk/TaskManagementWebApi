@@ -42,3 +42,4 @@ C:\Users\erkla\RiderProjects\TaskManagementWebApi\TaskManagementWebApi\bin\Debug
 C:\Users\erkla\RiderProjects\TaskManagementWebApi\TaskManagementWebApi\bin\Debug\net9.0\Microsoft.Extensions.Configuration.Abstractions.dll
 C:\Users\erkla\RiderProjects\TaskManagementWebApi\TaskManagementWebApi\bin\Debug\net9.0\Npgsql.dll
 C:\Users\erkla\RiderProjects\TaskManagementWebApi\TaskManagementWebApi\bin\Debug\net9.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
+C:\Users\erkla\RiderProjects\TaskManagementWebApi\TaskManagementWebApi\obj\Debug\net9.0\TaskManagementWebApi.sourcelink.json
