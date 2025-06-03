@@ -8,6 +8,10 @@
 ## Get latest from https://github.com/github/gitignore/blob/main/Dotnet.gitignore
 
 # Build results
+bin/
+Bin/
+obj/
+Obj/
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
@@ -18,41 +22,45 @@ x86/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
 bld/
-[Bb]in/
-[Oo]bj/
+artifacts/
 [Ll]og/
 [Ll]ogs/
 
 # .NET Core
 project.lock.json
 project.fragment.lock.json
-artifacts/
 
 # ASP.NET Scaffolding
 ScaffoldingReadMe.txt
 
 # NuGet Packages
 *.nupkg
-# NuGet Symbol Packages
 *.snupkg
 
-# Others
+# User-specific files
 ~$*
 *~
+*.user
+*.suo
+
+# Code coverage
 CodeCoverage/
 
-# MSBuild Binary and Structured Log
+# MSBuild logs
 *.binlog
 
-# MSTest test Results
+# Test results
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
-
-# NUnit
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
 
-# Rider
+# JetBrains Rider
 .idea/
 *.sln.iml
+
+# Resharper (used in Rider and Visual Studio)
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
