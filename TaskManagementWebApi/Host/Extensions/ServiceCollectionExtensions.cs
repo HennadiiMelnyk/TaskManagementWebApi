@@ -1,6 +1,6 @@
-using System.Text.Json.Serialization;
 using Asp.Versioning;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using Npgsql;
 using TaskManagementWebApi.Application.Handlers;
 using TaskManagementWebApi.Application.Handlers.Interfaces;
@@ -16,68 +16,6 @@ namespace TaskManagementWebApi.Host.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IHostBuilder AddHost(this IHostBuilder hostBuilder)
-    {
-        hostBuilder.ConfigureWebHost(builder =>
-        {
-            builder.UseKestrel();
-
-            builder.ConfigureServices(services =>
-            {
-                services.AddControllers()
-                    .AddJsonOptions(options =>
-                    {
-                        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-                    });
-
-                services.AddMemoryCache();
-                services.AddProblemDetails();
-            });
-
-            builder.Configure((context, app) =>
-            {
-                var isDevelopmentEnv = context.HostingEnvironment.IsStaging() || context.HostingEnvironment.IsDevelopment();
-
-                // app.UseMiddleware<ExceptionHandlingMiddleware>();
-                // app.UseHeaderPropagation();
-                //
-                // app.UseSwagger();
-                // app.UseSwaggerUI(c =>
-                // {
-                //     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Task management web API v1");
-                // });
-
-
-                app.UseRouting();
-                app.UseAuthorization();
-                app.UseEndpoints(endpoints =>
-                {
-                    endpoints.MapControllers();
-                });
-            });
-        });
-
-        return hostBuilder;
-    }
-    
-    public static IServiceCollection AddSwaggerWithApiVersioning(this IServiceCollection services)
-    {
-        services
-            .AddEndpointsApiExplorer()
-            .AddApiVersioning(config =>
-            {
-                config.DefaultApiVersion = ApiVersion.Default;
-                config.ReportApiVersions = true;
-                config.AssumeDefaultVersionWhenUnspecified = true;
-            })
-            .AddMvc()
-            .AddApiExplorer(options => options.GroupNameFormat = "'v'VVV");
-
-        // services.AddSwagger(versioningEnabled: true);
-
-        return services;
-    }
-    
     public static IServiceCollection AddRepositories(
         this IServiceCollection serviceCollection,
         IConfiguration configuration)
@@ -108,7 +46,7 @@ public static class ServiceCollectionExtensions
         services.AddTransient<ICandidateSelectionHandler, ExcludePreviousUserHandler>();
         services.AddSingleton<CandidateHandlerChainBuilder>();
         
-        services.AddSingleton<TaskEventPublisher>();
+        services.AddScoped<TaskEventPublisher>();
         services.AddScoped<ITaskObserver, LoggingTaskObserver>();
 
         return services;
@@ -122,5 +60,36 @@ public static class ServiceCollectionExtensions
         appContext.Database.Migrate();
 
         return host;
+    }
+    
+    public static IServiceCollection AddSwaggerWithApiVersioning(this IServiceCollection services)
+    {
+        services
+            .AddEndpointsApiExplorer()
+            .AddApiVersioning(options =>
+            {
+                options.DefaultApiVersion = new ApiVersion(1, 0);
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.ReportApiVersions = true;
+            })
+            .AddApiExplorer(options =>
+            {
+                options.GroupNameFormat = "'v'VVV";
+                options.SubstituteApiVersionInUrl = true;
+            });
+
+        services.AddSwaggerGen(options =>
+        {
+            options.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Version = "v1",
+                Title = "Task Management API",
+                Description = "API for managing users and tasks"
+            });
+
+            options.UseInlineDefinitionsForEnums();
+        });
+
+        return services;
     }
 }

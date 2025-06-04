@@ -15,7 +15,7 @@ public class TasksController : ControllerBase
     public TasksController(ITaskService service) => _service = service;
 
     [HttpPost]
-    public async Task<IActionResult> Create(TaskCreateDto dto)
+    public async Task<IActionResult> Create([FromBody] TaskCreateDto dto)
     {
         try
         {

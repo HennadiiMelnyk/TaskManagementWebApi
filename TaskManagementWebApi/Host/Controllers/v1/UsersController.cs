@@ -16,7 +16,7 @@ public class UsersController : ControllerBase
     public UsersController(IUserService service) => _service = service;
     
     [HttpPost]
-    public async Task<IActionResult> Create(UserCreateDto dto)
+    public async Task<IActionResult> Create([FromBody] UserCreateDto dto)
     {
         try
         {

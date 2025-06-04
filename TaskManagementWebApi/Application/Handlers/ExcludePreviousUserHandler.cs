@@ -4,9 +4,9 @@ namespace TaskManagementWebApi.Application.Handlers;
 
 public class ExcludePreviousUserHandler : AbstractCandidateHandler
 {
-    protected override User[] Process(User[] candidates, TaskItem task, IEnumerable<TaskAssignmentHistory> history)
+    protected override IQueryable<User> Process(IQueryable<User> users, TaskItem task, IEnumerable<TaskAssignmentHistory> history)
     {
-        var previousUserId = history.Skip(1).FirstOrDefault()?.AssignedUserId;
-        return previousUserId == null ? candidates : candidates.Where(u => u.Id != previousUserId).ToArray();
+        var prevUserId = history.Skip(1).FirstOrDefault()?.AssignedUserId;
+        return prevUserId == null ? users : users.Where(u => u.Id != prevUserId);
     }
 }
