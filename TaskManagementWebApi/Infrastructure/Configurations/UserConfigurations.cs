@@ -15,6 +15,5 @@ public class UserConfigurations : IEntityTypeConfiguration<User>
             .WithOne(e => e.AssignedUser)
             .HasForeignKey(e => e.AssignedUserId);
 
-        //builder.HasIndex(e => e.Id);
     }
 }
