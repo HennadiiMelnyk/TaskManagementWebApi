@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using TaskManagementWebApi.Exceptions;
 using TaskManagementWebApi.Host.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,7 @@ builder.Services.AddControllers()
     });
 
 var app = builder.Build();
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 {
@@ -34,7 +36,5 @@ app.UseEndpoints(endpoints =>
 });
 
 app.MigrateDatabase();
-
-app.MapGet("/", () => "Hello World!");
 
 app.Run();

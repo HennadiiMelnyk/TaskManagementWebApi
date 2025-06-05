@@ -25,16 +25,6 @@ public class UserService : IUserService
 
         return new UserDto { Id = result.Id, Name = result.Name };
     }
-    
-    public Task<User> AddAsync(User user)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<User?> GetByNameAsync(string name)
-    {
-        throw new NotImplementedException();
-    }
 
     public Task<UserDto[]> GetAllAsync()
     {
